@@ -378,7 +378,7 @@ async function handleSubmit(e: Event) {
 	</div>
 
 	<!-- Edit Popup -->
-	<div class="edit-popup" id="editPopup on:submit={handleEditSubmit}">
+	<div class="edit-popup" id="editPopup">
 		<button class="close-btn" id="closeEditPopup">x</button>
 		<h2>Edit</h2>
 		<form id="editFinanceForm" class="editFinance">
