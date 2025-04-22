@@ -52,6 +52,12 @@
 
 	async function handleEditSubmit(e: Event) {
 		e.preventDefault();
+		console.log('Edit form submitted');
+
+		if (!editTransaction) {
+        console.error('No transaction selected for editing');
+        return;
+    }
 
 		if (!editTransaction) return;
 
@@ -254,6 +260,10 @@
 			chatMessages.innerHTML += `<div class="message user">Generating financial report...</div>`;
 		}
 
+		if (userPromptInput) {
+            userPromptInput.value = '';
+        }
+
 		const transactionSummary = transactions
 			.map(
 				(t) =>
@@ -409,7 +419,7 @@
 	<div class="edit-popup" id="editPopup">
 		<button class="close-btn" id="closeEditPopup">x</button>
 		<h2>Edit</h2>
-		<form id="editFinanceForm" class="editFinance">
+		<form id="editFinanceForm" class="editFinance" on:submit={handleEditSubmit}>
 			<div>
 				<label for="editDate">Date</label>
 				<input type="date" id="editDate" name="date" required />
@@ -441,8 +451,10 @@
 			</button>
 		</div>
 		<div class="chat-box">
-			<div id="chatMessages" class="messages">
-			
+			<div id="chatMessages" class="messages" bind:this={chatMessages}>
+				{#if chatMessages && chatMessages.innerHTML.trim() === ''}
+					<p class="placeholder">No messages yet. Start a conversation!</p>
+				{/if}
 			</div>
 			<form id="chatForm" on:submit={handleSubmit}>
 				<input
