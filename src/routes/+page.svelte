@@ -133,6 +133,63 @@
 			});
 		}
 	});
+
+	let chatMessages: HTMLDivElement | null = null;
+
+	async function handleSubmit(e: Event) {
+		e.preventDefault();
+
+		if (chatMessages) {
+			chatMessages.innerHTML += `<div class="message user">Generating financial report based on current transactions...</div>`;
+		}
+
+		// Convert transactions array into a summary string
+		const transactionSummary = transactions
+			.map(
+				(t) =>
+					`Date: ${t.date}, Description: ${t.description}, Category: ${t.category}, Amount: ${t.amount}, Status: ${t.status}`
+			)
+			.join('\n');
+
+		const prompt = `
+    Generate a detailed financial report summary based on the following transactions:
+
+    ${transactionSummary}
+
+    Include insights such as total spending, spending by category, and suggestions for budgeting.
+  `;
+
+		try {
+			const response = await fetch('http://localhost:3050/gemini/generate', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify({
+					text: prompt
+				})
+			});
+
+			const result = await response.json();
+
+			if (result.success) {
+				const aiResponse =
+					result.data?.candidates?.[0]?.content?.parts?.[0]?.text || 'No response from AI.';
+				if (chatMessages) {
+					chatMessages.innerHTML += `<div class="message ai">${aiResponse}</div>`;
+				}
+			} else {
+				if (chatMessages) {
+					chatMessages.innerHTML += `<div class="message error">Error: ${result.error}</div>`;
+				}
+			}
+		} catch (error) {
+			console.error(error);
+			if (chatMessages) {
+				chatMessages.innerHTML += `<div class="message error">Failed to reach the server.</div>`;
+			}
+		}
+	}
 </script>
 
 <header>
@@ -246,9 +303,9 @@
 		<div id="chatMessages" class="messages">
 			<!-- Chat messages will appear here -->
 		</div>
-		<form id="chatForm">
-			<input type="text" id="userInput" placeholder="Ask something..." required />
-			<button type="submit">Send</button>
-		</form>
+        <form id="chatForm" on:submit={handleSubmit}>
+            <button type="submit">Generate Financial Report</button>
+        </form>
+        
 	</div>
 </div>
