@@ -287,21 +287,23 @@ header {
 
 .ai-container {
     padding: 0 40px 0 40px;
+   padding-bottom: 3rem;
 }
 
 .ai-integration {
     max-width: 1440px;
     margin: 0 auto;
     flex: 1;
-    background-color: #2a2a3c;
+    background-color: #f0fdfc;
     border-radius: 10px;
     padding: 20px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
     margin-top: 20px;
 }
 
 .ai-integration h2 {
     margin-bottom: 20px;
+    color: #006A71;
 }
 
 .chat-box {
@@ -315,9 +317,9 @@ header {
     overflow-y: auto;
     margin-bottom: 10px;
     padding: 10px;
-    background-color: #1e1e2f;
+    background-color: #fff;
     border-radius: 5px;
-    border: 1px solid #444;
+    border: 1px solid #ccc;
 }
 
 .messages .message {
@@ -326,12 +328,12 @@ header {
 
 .messages .message.user {
     text-align: right;
-    color: #007bff;
+    color: #006A71;
 }
 
 .messages .message.ai {
     text-align: left;
-    color: #aaa;
+    color: #333;
 }
 
 #chatForm {
@@ -344,8 +346,8 @@ header {
     padding: 10px;
     border: none;
     border-radius: 5px;
-    background-color: #1e1e2f;
-    color: #fff;
+    background-color: #fff;
+    color: #333;
 }
 
 #chatForm button {
@@ -355,10 +357,11 @@ header {
     background-color: #006A71;
     color: #fff;
     cursor: pointer;
+    transition: background-color 0.3s ease;
 }
 
 #chatForm button:hover {
-    background-color: hsl(184, 100%, 20%);
+    background-color: #004f54;
 }
 
 
