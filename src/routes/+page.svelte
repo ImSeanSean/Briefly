@@ -292,7 +292,7 @@ async function handleSubmit(e: Event) {
 						<td>{transaction.description}</td>
 						<td>{transaction.category}</td>
 						<td>{transaction.amount}</td>
-						<td><button class="edit-btn">Edit</button></td>
+						<td> <button class="edit-btn" on:click={() => openEditPopup(transaction)}>Edit</button></td>
 					</tr>
 				{/each}
 			</tbody>
