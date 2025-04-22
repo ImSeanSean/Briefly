@@ -135,61 +135,127 @@
 	});
 
 	let chatMessages: HTMLDivElement | null = null;
+	let chatMessagesContent: string[] = [];
 
-	async function handleSubmit(e: Event) {
-		e.preventDefault();
+	function handleQuickSummary() {
+        const chatMessages = document.getElementById('chatMessages');
+        if (chatMessages) {
+            chatMessages.innerHTML += `<div class="message user">Generating quick financial summary...</div>`;
+        }
 
-		if (chatMessages) {
-			chatMessages.innerHTML += `<div class="message user">Generating financial report based on current transactions...</div>`;
-		}
+        // Generate a quick summary based on transactions
+        const transactionSummary = transactions
+            .map(
+                (t) =>
+                    `Date: ${t.date}, Description: ${t.description}, Category: ${t.category}, Amount: ${t.amount}, Status: ${t.status}`
+            )
+            .join('\n');
 
-		// Convert transactions array into a summary string
-		const transactionSummary = transactions
-			.map(
-				(t) =>
-					`Date: ${t.date}, Description: ${t.description}, Category: ${t.category}, Amount: ${t.amount}, Status: ${t.status}`
-			)
-			.join('\n');
+        const prompt = `
+        Generate a quick financial summary based on the following transactions:
 
-		const prompt = `
-    Generate a detailed financial report summary based on the following transactions:
+        ${transactionSummary}
 
-    ${transactionSummary}
+        The currency is PHP. Provide a clean summary paragraph with insights such as total spending, spending by category, and suggestions for budgeting. Highlight important details.
+        `;
 
-    return a json prompt with this structure. Include insights such as total spending, spending by category, and suggestions for budgeting.
-  `;
+        // Fetch the summary from the backend
+        fetch('http://localhost:3050/gemini/generate', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                text: prompt
+            })
+        })
+            .then((response) => response.json())
+            .then((result) => {
+                if (result.success) {
+                    const aiResponse =
+                        result.data?.candidates?.[0]?.content?.parts?.[0]?.text || 'No response from AI.';
+                    if (chatMessages) {
+                        chatMessages.innerHTML += `<div class="message ai"><strong>AI:</strong> <p>${aiResponse}</p></div>`;
+                    }
+                } else {
+                    if (chatMessages) {
+                        chatMessages.innerHTML += `<div class="message error">Error: ${result.error}</div>`;
+                    }
+                }
+            })
+            .catch((error) => {
+                console.error(error);
+                if (chatMessages) {
+                    chatMessages.innerHTML += `<div class="message error">Failed to reach the server.</div>`;
+                }
+            });
+    }
 
-		try {
-			const response = await fetch('http://localhost:3050/gemini/generate', {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json'
-				},
-				body: JSON.stringify({
-					text: prompt
-				})
-			});
+async function handleSubmit(e: Event) {
+	e.preventDefault();
 
-			const result = await response.json();
+	const userPromptInput = document.getElementById('userPrompt') as HTMLInputElement;
+	const userPrompt = userPromptInput?.value || '';
+	const chatMessages = document.getElementById('chatMessages');
 
-			if (result.success) {
-				const aiResponse =
-					result.data?.candidates?.[0]?.content?.parts?.[0]?.text || 'No response from AI.';
-				if (chatMessages) {
-					chatMessages.innerHTML += `<div class="message ai">${aiResponse}</div>`;
-				}
-			} else {
-				if (chatMessages) {
-					chatMessages.innerHTML += `<div class="message error">Error: ${result.error}</div>`;
-				}
-			}
-		} catch (error) {
-			console.error(error);
+	if (chatMessages) {
+		chatMessages.innerHTML += `<div class="message user"><strong>User:</strong> ${userPrompt}</div>`;
+		chatMessages.innerHTML += `<div class="message user">Generating financial report...</div>`;
+	}
+
+	const transactionSummary = transactions
+		.map(
+			(t) =>
+				`Date: ${t.date}, Description: ${t.description}, Category: ${t.category}, Amount: ${t.amount}, Status: ${t.status}`
+		)
+		.join('\n');
+
+	const prompt = `
+	${userPrompt}
+
+	Here are the transactions:
+	${transactionSummary}
+
+	The currency is PHP. Provide a clean summary paragraph with insights such as total spending, spending by category, and suggestions for budgeting. Highlight important details.
+	`;
+
+	try {
+		const response = await fetch('http://localhost:3050/gemini/generate', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({
+				text: prompt
+			})
+		});
+
+		const result = await response.json();
+
+		if (result.success) {
+			const aiResponse =
+				result.data?.candidates?.[0]?.content?.parts?.[0]?.text || 'No response from AI.';
+
+			// Format the response as a clean paragraph
+			const formattedResponse = aiResponse
+				.replace(/"([^"]+)":/g, '<strong>$1:</strong>') // Highlight keys
+				.replace(/\n/g, '<br>'); // Add line breaks for readability
+
 			if (chatMessages) {
-				chatMessages.innerHTML += `<div class="message error">Failed to reach the server.</div>`;
+				chatMessages.innerHTML += `<div class="message ai"><strong>AI:</strong> <p>${formattedResponse}</p></div>`;
 			}
+		} else {
+			if (chatMessages) {
+				chatMessages.innerHTML += `<div class="message error">Error: ${result.error}</div>`;
+			}
+		}
+	} catch (error) {
+		console.error(error);
+		if (chatMessages) {
+			chatMessages.innerHTML += `<div class="message error">Failed to reach the server.</div>`;
 		}
 	}
+}
 </script>
 
 <header>
@@ -298,16 +364,31 @@
 </div>
 
 <div class="ai-container">
-	<div class="ai-integration">
-		<h2>fAInance</h2>
-		<div class="chat-box">
-			<div id="chatMessages" class="messages">
-				<!-- Chat messages will appear here -->
+    <div class="ai-integration">
+        <div class="top-actions">
+			<h2>fAInance</h2>
+            <button type="button" class="quick-summary-btn" on:click={handleQuickSummary}>
+                Quick Summary
+            </button>
+        </div>
+        <div class="chat-box">
+            <div id="chatMessages" class="messages">
+				{#if chatMessagesContent.length === 0}
+				<p class="placeholder-text">No messages yet. Start by entering a prompt or click "Quick Summary".</p>
+			{/if}
+			{@html chatMessagesContent.join('')}
+
 			</div>
-			<form id="chatForm" on:submit={handleSubmit}>
-				<button type="submit">Generate Financial Report</button>
-			</form>
-			
-		</div>
-	</div>
+            <form id="chatForm" on:submit={handleSubmit}>
+                <input
+                    type="text"
+                    id="userPrompt"
+                    placeholder="Enter your custom prompt here..."
+                    class="prompt-input"
+                    required
+                />
+                <button type="submit">Send</button>
+            </form>
+        </div>
+    </div>
 </div>
