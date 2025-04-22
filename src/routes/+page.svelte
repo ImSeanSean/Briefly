@@ -3,6 +3,7 @@
 
 	let transactions = [
 		{
+			id: 1,
 			date: '2025-04-08',
 			description: 'Grocery Store',
 			category: 'Groceries',
@@ -10,6 +11,7 @@
 			status: 'Completed'
 		},
 		{
+			id: 2,
 			date: '2025-04-10',
 			description: 'Electric Bill',
 			category: 'Utilities',
@@ -19,9 +21,10 @@
 		// Additional mock data can be added here
 	];
 
-	let editTransaction = null;
+	let editTransaction: Transaction | null = null;
 
 	interface Transaction {
+        id: number;
 		date: string;
 		description: string;
 		category: string;
@@ -46,6 +49,57 @@
 		if (editStatus) editStatus.value = transaction.status;
 		if (editPopup) editPopup.classList.add('active');
 	};
+
+    async function handleEditSubmit(e: Event) {
+	e.preventDefault();
+
+	if (!editTransaction) return;
+
+	const editDate = document.getElementById('editDate') as HTMLInputElement | null;
+	const editDescription = document.getElementById('editDescription') as HTMLInputElement | null;
+	const editCategory = document.getElementById('editCategory') as HTMLInputElement | null;
+	const editAmount = document.getElementById('editAmount') as HTMLInputElement | null;
+	const editStatus = document.getElementById('editStatus') as HTMLSelectElement | null;
+
+	if (!editDate || !editDescription || !editCategory || !editAmount || !editStatus) return;
+
+	const updatedTransaction = {
+		id: editTransaction.id,
+		date: editDate.value,
+		description: editDescription.value,
+		category: editCategory.value,
+		amount: parseFloat(editAmount.value),
+		status: editStatus.value
+	};
+
+	try {
+		const res = await fetch('http://localhost:3050/update', {
+			method: 'PUT',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify(updatedTransaction)
+		});
+
+		const result = await res.json();
+		if (result.success) {
+			alert('Transaction updated!');
+			closeEditPopup();
+			// Reload or refresh transaction list here if needed
+		} else {
+			alert('Failed to update: ' + result.message);
+		}
+	} catch (err) {
+		console.error('Update error:', err);
+		alert('Error connecting to the server.');
+	}
+}
+
+
+function closeEditPopup() {
+	const editPopup = document.getElementById('editPopup');
+	if (editPopup) editPopup.classList.remove('active');
+	editTransaction = null;
+}
+
 
 	const addFinance = (e: Event) => {
 		e.preventDefault();
@@ -266,14 +320,14 @@ async function handleSubmit(e: Event) {
 	<div class="data-overview">
 		<h2>Data Overview</h2>
 		<div class="actions">
-			<select id="categoryFilter" class="category-filter">
+			<!-- <select id="categoryFilter" class="category-filter">
 				<option value="">All Categories</option>
 				<option value="Groceries">Groceries</option>
-				<option value="Utilities">Utilities</option>
+				<option value="Utilities">Utilities</option> -->
 				<!-- Categories will be dynamically added here -->
-			</select>
+			<!-- </select>
 			<button>Export</button>
-			<button>Refresh</button>
+			<button>Refresh</button> -->
 		</div>
 		<table>
 			<thead>
@@ -319,19 +373,12 @@ async function handleSubmit(e: Event) {
 				<label for="amount">Amount</label>
 				<input type="number" id="amount" name="amount" required />
 			</div>
-			<div>
-				<label for="status">Status</label>
-				<select id="status" name="status" required>
-					<option value="Completed">Completed</option>
-					<option value="Pending">Pending</option>
-				</select>
-			</div>
 			<button type="submit">Add</button>
 		</form>
 	</div>
 
 	<!-- Edit Popup -->
-	<div class="edit-popup" id="editPopup">
+	<div class="edit-popup" id="editPopup on:submit={handleEditSubmit}">
 		<button class="close-btn" id="closeEditPopup">x</button>
 		<h2>Edit</h2>
 		<form id="editFinanceForm" class="editFinance">
@@ -351,13 +398,7 @@ async function handleSubmit(e: Event) {
 				<label for="editAmount">Amount</label>
 				<input type="number" id="editAmount" name="amount" required />
 			</div>
-			<div>
-				<label for="editStatus">Status</label>
-				<select id="editStatus" name="status" required>
-					<option value="Completed">Completed</option>
-					<option value="Pending">Pending</option>
-				</select>
-			</div>
+
 			<button type="submit">Save</button>
 		</form>
 	</div>
