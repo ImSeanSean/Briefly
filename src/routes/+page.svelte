@@ -156,7 +156,7 @@
 
     ${transactionSummary}
 
-    Include insights such as total spending, spending by category, and suggestions for budgeting.
+    return a json prompt with this structure. Include insights such as total spending, spending by category, and suggestions for budgeting.
   `;
 
 		try {
