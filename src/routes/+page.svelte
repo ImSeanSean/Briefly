@@ -55,9 +55,9 @@
 		console.log('Edit form submitted');
 
 		if (!editTransaction) {
-        console.error('No transaction selected for editing');
-        return;
-    }
+			console.error('No transaction selected for editing');
+			return;
+		}
 
 		if (!editTransaction) return;
 
@@ -200,6 +200,13 @@
 			chatMessages.innerHTML += `<div class="message user">Generating quick financial summary...</div>`;
 		}
 
+		if (chatMessages) {
+			const placeholder = chatMessages.querySelector('.placeholder-text');
+			if (placeholder) {
+				placeholder.remove();
+			}
+		}
+
 		// Generate a quick summary based on transactions
 		const transactionSummary = transactions
 			.map(
@@ -256,13 +263,20 @@
 		const chatMessages = document.getElementById('chatMessages');
 
 		if (chatMessages) {
+			const placeholder = chatMessages.querySelector('.placeholder');
+			if (placeholder) {
+				placeholder.remove();
+			}
+		}
+
+		if (chatMessages) {
 			chatMessages.innerHTML += `<div class="message user"><strong>User:</strong> ${userPrompt}</div>`;
 			chatMessages.innerHTML += `<div class="message user">Generating financial report...</div>`;
 		}
 
 		if (userPromptInput) {
-            userPromptInput.value = '';
-        }
+			userPromptInput.value = '';
+		}
 
 		const transactionSummary = transactions
 			.map(
@@ -452,9 +466,7 @@
 		</div>
 		<div class="chat-box">
 			<div id="chatMessages" class="messages" bind:this={chatMessages}>
-				{#if chatMessages && chatMessages.innerHTML.trim() === ''}
-					<p class="placeholder">No messages yet. Start a conversation!</p>
-				{/if}
+				<div class="placeholder-text">No messages yet — start a conversation!</div>
 			</div>
 			<form id="chatForm" on:submit={handleSubmit}>
 				<input
