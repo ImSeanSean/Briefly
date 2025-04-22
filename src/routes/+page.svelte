@@ -200,7 +200,7 @@
 	<div class="data-overview">
 		<h2>Data Overview</h2>
 		<div class="actions">
-			<select id="categoryFilter">
+			<select id="categoryFilter" class="category-filter">
 				<option value="">All Categories</option>
 				<option value="Groceries">Groceries</option>
 				<option value="Utilities">Utilities</option>
@@ -297,15 +297,17 @@
 	</div>
 </div>
 
-<div class="ai-integration">
-	<h2>fAInance</h2>
-	<div class="chat-box">
-		<div id="chatMessages" class="messages">
-			<!-- Chat messages will appear here -->
+<div class="ai-container">
+	<div class="ai-integration">
+		<h2>fAInance</h2>
+		<div class="chat-box">
+			<div id="chatMessages" class="messages">
+				<!-- Chat messages will appear here -->
+			</div>
+			<form id="chatForm" on:submit={handleSubmit}>
+				<button type="submit">Generate Financial Report</button>
+			</form>
+			
 		</div>
-        <form id="chatForm" on:submit={handleSubmit}>
-            <button type="submit">Generate Financial Report</button>
-        </form>
-        
 	</div>
 </div>
