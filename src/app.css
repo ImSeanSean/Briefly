@@ -412,6 +412,7 @@ header {
     padding: 10px 0;
     position: absolute;
     bottom: 0;
+    right: 20px;
     width: 95%;
     display: flex;
     justify-content: end;
@@ -444,6 +445,14 @@ header {
     .container, .ai-container {
         flex-direction: column;
         padding: 0 20px;
+    }
+
+    .data-overview {
+        height: 700px !important;
+    }
+
+    .pagination {
+        bottom: -30px;
     }
 
     .data-overview,
