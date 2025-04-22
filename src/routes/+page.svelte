@@ -263,7 +263,7 @@
 		const chatMessages = document.getElementById('chatMessages');
 
 		if (chatMessages) {
-			const placeholder = chatMessages.querySelector('.placeholder');
+			const placeholder = chatMessages.querySelector('.placeholder-text');
 			if (placeholder) {
 				placeholder.remove();
 			}
